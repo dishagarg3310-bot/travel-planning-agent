@@ -3,9 +3,11 @@ import json
 import re
 from datetime import date, timedelta
 
+import pandas as pd
 import streamlit as st
 
-from agent.travel_agent import plan_trip
+from agent.travel_agent import plan_trip_with_steps
+from tools.weather_tool import CITY_COORDINATES
 
 CITIES = ["Bangalore", "Chennai", "Delhi", "Goa", "Hyderabad", "Jaipur", "Kolkata", "Mumbai"]
 
@@ -21,6 +23,26 @@ def split_itinerary(text: str):
     except json.JSONDecodeError:
         data = None
     return readable, data
+
+
+def show_route_map(source: str, destination: str) -> None:
+    """Show source and destination cities on a map."""
+    rows = []
+    for city in (source, destination):
+        latitude, longitude = CITY_COORDINATES[city.lower()]
+        rows.append({"city": city, "lat": latitude, "lon": longitude})
+    st.subheader("Route map")
+    st.map(pd.DataFrame(rows), size=20000)
+
+
+def show_agent_steps(steps: list) -> None:
+    """Show which tools the agent called, with inputs and outputs."""
+    with st.expander("Agent steps (tools called)"):
+        for number, step in enumerate(steps, start=1):
+            st.markdown(f"**Step {number}: `{step['tool']}`**")
+            st.json(step["input"])
+            st.caption("Output (truncated)")
+            st.code(str(step["output"])[:500])
 
 
 st.set_page_config(page_title="AI Travel Planner", page_icon="✈️", layout="centered")
@@ -55,9 +77,11 @@ if generate:
         )
         with st.spinner("Agent is planning your trip..."):
             try:
-                answer = plan_trip(query)
+                answer, steps = plan_trip_with_steps(query)
                 readable, trip_json = split_itinerary(answer)
                 st.markdown(readable)
+                show_route_map(source, destination)
+                show_agent_steps(steps)
                 if trip_json:
                     st.subheader("JSON Output")
                     st.json(trip_json, expanded=False)

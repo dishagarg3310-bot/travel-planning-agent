@@ -35,6 +35,8 @@ Important rules:
 - If no return flight exists in the data, say so and budget the onward flight only.
 - If a tool returns an error, say so clearly instead of making things up.
 - Spread the places across the days; do not repeat a place.
+- If no flight exists for a route, clearly say so, but STILL complete hotel,
+  places, weather and budget. Use 0 for the missing flight prices in estimate_budget.
 
 Final answer format:
 ## Trip Summary
@@ -74,6 +76,25 @@ def plan_trip(user_query: str) -> str:
     result = agent.invoke({"messages": [{"role": "user", "content": user_query}]})
     return result["messages"][-1].content
 
+def plan_trip_with_steps(user_query: str):
+    """Run the agent and return (final answer, list of tool-call steps)."""
+    agent = build_agent()
+    result = agent.invoke({"messages": [{"role": "user", "content": user_query}]})
+    messages = result["messages"]
+
+    calls = {}
+    steps = []
+    for message in messages:
+        for call in getattr(message, "tool_calls", None) or []:
+            calls[call["id"]] = call
+        if message.type == "tool":
+            call = calls.get(message.tool_call_id, {})
+            steps.append({
+                "tool": message.name,
+                "input": call.get("args", {}),
+                "output": message.content,
+            })
+    return messages[-1].content, steps
 
 if __name__ == "__main__":
     query = (

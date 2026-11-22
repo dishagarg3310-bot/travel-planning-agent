@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WanderAI | AI Travel Planner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+  <header class="navbar">
+    <div class="logo">✈️ Wander<span>AI</span></div>
+    <nav>
+      <a href="#planner">Plan Trip</a>
+      <a href="#how">How it works</a>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <div class="hero-text">
+      <h1>Your AI travel agent,<br>planning trips in seconds</h1>
+      <p>Flights, hotels, places and live weather, combined into one smart itinerary.</p>
+    </div>
+
+    <form id="trip-form" class="search-card">
+      <div class="field">
+        <label for="source">From</label>
+        <select id="source"></select>
+      </div>
+      <div class="field">
+        <label for="destination">To</label>
+        <select id="destination"></select>
+      </div>
+      <div class="field">
+        <label for="start_date">Start date</label>
+        <input type="date" id="start_date" required>
+      </div>
+      <div class="field">
+        <label for="end_date">End date</label>
+        <input type="date" id="end_date" required>
+      </div>
+      <div class="field">
+        <label for="flight_preference">Flight</label>
+        <select id="flight_preference">
+          <option value="cheapest">Cheapest</option>
+          <option value="fastest">Fastest</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="min_stars">Hotel stars</label>
+        <select id="min_stars">
+          <option value="1">1+ star</option>
+          <option value="2">2+ stars</option>
+          <option value="3">3+ stars</option>
+          <option value="4" selected>4+ stars</option>
+          <option value="5">5 stars</option>
+        </select>
+      </div>
+      <div class="field wide">
+        <label for="extra_notes">Preferences (optional)</label>
+        <input type="text" id="extra_notes" placeholder="e.g. I love beaches and local food">
+      </div>
+      <button type="submit" id="plan-btn" class="btn-primary">Plan my trip</button>
+    </form>
+  </section>
+
+  <section id="loading" class="loading hidden">
+    <div class="spinner"></div>
+    <p>Our AI agent is searching flights, hotels and weather...</p>
+  </section>
+
+  <section id="error" class="error-box hidden"></section>
+
+  <main id="results" class="results hidden">
+    <h2 id="trip-title"></h2>
+    <p id="trip-dates" class="muted"></p>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-icon">🛫</div>
+        <h3>Flights</h3>
+        <div id="flight-card"></div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🏨</div>
+        <h3>Hotel</h3>
+        <div id="hotel-card"></div>
+      </div>
+      <div class="card card-budget">
+        <div class="card-icon">💰</div>
+        <h3>Total budget</h3>
+        <div id="budget-card"></div>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="tab-itinerary">Itinerary</button>
+      <button class="tab" data-tab="tab-weather">Weather</button>
+      <button class="tab" data-tab="tab-details">Full plan</button>
+      <button class="tab" data-tab="tab-steps">Agent steps</button>
+      <button class="tab" data-tab="tab-json">JSON</button>
+    </div>
+
+    <div id="tab-itinerary" class="tab-panel active"></div>
+    <div id="tab-weather" class="tab-panel"></div>
+    <div id="tab-details" class="tab-panel"></div>
+    <div id="tab-steps" class="tab-panel"></div>
+    <div id="tab-json" class="tab-panel"></div>
+
+    <div class="actions">
+      <button id="download-json" class="btn-secondary">Download JSON</button>
+      <button id="download-pdf" class="btn-secondary">Download PDF</button>
+    </div>
+  </main>
+
+  <section id="how" class="how">
+    <h2>How it works</h2>
+    <div class="steps">
+      <div class="step"><span>1</span><p>Tell us where, when and what you like</p></div>
+      <div class="step"><span>2</span><p>The AI agent calls flight, hotel, places and weather tools</p></div>
+      <div class="step"><span>3</span><p>Get a day-wise itinerary with budget and reasons</p></div>
+    </div>
+  </section>
+
+  <footer class="footer">Built with LangChain, Groq and FastAPI</footer>
+  <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+  <script src="/static/script.js"></script>
+</body>
+</html>
