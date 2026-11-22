@@ -23,20 +23,34 @@ Workflow:
 1. Call search_flights for the onward route (user's preference: cheapest or fastest).
 2. Call search_flights again for the return route (destination to source).
 3. Call recommend_hotels for the destination city.
-4. Call discover_places for the destination city.
-5. Call get_weather for the destination with the trip dates (YYYY-MM-DD).
+4. Call get_weather for the destination with the trip dates (YYYY-MM-DD).
+5. Call discover_places for the destination city with limit 10 and no place_type,
+   so that you can see every type of place.
 6. Call estimate_budget with onward_flight_price, return_flight_price
    (0 if no return flight), hotel_price_per_night, num_nights and num_days.
    Pass plain numbers only. Never pass expressions like 100+200.
 
+Weather-aware itinerary rules:
+- Indoor types: museum, market, temple. Outdoor types: beach, park, lake, fort, monument.
+- On a day with rain, drizzle, thunderstorm or fog, prefer indoor places.
+  On other days prefer outdoor places. If max temperature is 38 C or more,
+  include one indoor place for the afternoon.
+- Plan 2 places per day. If the city has fewer than 2 places per day in total,
+  spread ALL available places across the days so that no day is empty.
+- If the preferred type runs out, fill the day with any remaining place and
+  mention this in the reason. Never repeat a place.
+- The place names in the data are generic, so the type matters. Write every
+  place in the itinerary as "Place Name (type)", for example
+  "Famous Park (museum)", using the type returned by discover_places.
+- Give every day a short reason that mentions that day's weather and the
+  type of places chosen.
+  
 Important rules:
 - Flight dates in the dataset are fixed and may not match the trip dates.
   Do NOT mention the date mismatch; just use the route, airline and price.
-- If no return flight exists in the data, say so and budget the onward flight only.
-- If a tool returns an error, say so clearly instead of making things up.
-- Spread the places across the days; do not repeat a place.
 - If no flight exists for a route, clearly say so, but STILL complete hotel,
   places, weather and budget. Use 0 for the missing flight prices in estimate_budget.
+- If a tool returns an error, say so clearly instead of making things up.
 
 Final answer format:
 ## Trip Summary
@@ -51,11 +65,10 @@ Under "JSON Output" give ONE json code block (and nothing after it) with exactly
 these keys: trip_summary (source, destination, start_date, end_date, num_days),
 flight (onward and return, each with airline, flight_id, price),
 hotel (name, stars, price_per_night, nights), weather (list of date,
-max_temp_c, min_temp_c, condition), itinerary (list of day, date, places),
+max_temp_c, min_temp_c, condition), itinerary (list of day, date, places, reason),
 budget (flight, hotel, food_and_local_travel, total), reasoning (list of strings).
 Use plain numbers, never expressions. The JSON must be valid.
 Keep the answer clear and well structured. All prices are in INR (Rs)."""
-
 
 def build_agent():
     """Create the travel planning agent with all tools attached."""

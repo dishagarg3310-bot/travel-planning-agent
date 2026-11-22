@@ -278,3 +278,32 @@ pre {
   .search-card, .cards, .steps { grid-template-columns: 1fr; }
   .field.wide { grid-column: span 1; }
 }
+/* Recent trips */
+.history { max-width: 1050px; margin: 0 auto; padding: 10px 6% 30px; }
+.history h2 { margin-bottom: 16px; font-size: 1.6rem; }
+.history-list { display: grid; gap: 12px; }
+.history-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  background: var(--card);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  padding: 14px 20px;
+}
+.history-actions { display: flex; gap: 8px; }
+.btn-small {
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 7px 16px;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-small:hover { background: var(--primary-dark); }
+.btn-small.danger { background: #fff; color: #c0392b; border: 1.5px solid #c0392b; }
+.btn-small.danger:hover { background: #c0392b; color: #fff; }

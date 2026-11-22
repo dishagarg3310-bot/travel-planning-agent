@@ -98,6 +98,7 @@ function renderItinerary(trip) {
         <div class="day-card">
           <h4>Day ${esc(day.day)} · ${esc(day.date)}</h4>
           ${(day.places || []).map((p) => `<span class="chip">📍 ${esc(p)}</span>`).join("")}
+          ${day.reason ? `<p class="muted">💡 ${esc(day.reason)}</p>` : ""}
         </div>`).join("")
     : "<p class='muted'>No itinerary available.</p>";
 }
@@ -187,6 +188,7 @@ async function planTrip(event) {
       throw new Error(data.detail || "Something went wrong");
     }
     renderResults(data, form);
+    loadHistory();
   } catch (error) {
     $("error").textContent = error.message;
     $("error").classList.remove("hidden");
@@ -213,7 +215,61 @@ $("download-pdf").addEventListener("click", async () => {
   if (response.ok) downloadBlob(await response.blob(), "trip.pdf");
 });
 
+/* ---------- trip history ---------- */
+async function loadHistory() {
+  try {
+    const response = await fetch("/api/trips");
+    renderHistory(await response.json());
+  } catch (error) {
+    console.error("Could not load history", error);
+  }
+}
+
+function renderHistory(trips) {
+  const section = $("history");
+  if (!trips.length) {
+    section.classList.add("hidden");
+    return;
+  }
+  section.classList.remove("hidden");
+  $("history-list").innerHTML = trips.map((t) => `
+    <div class="history-card">
+      <div>
+        <strong>${esc(t.source_city)} → ${esc(t.destination_city)}</strong>
+        <div class="muted">${esc(t.start_date)} to ${esc(t.end_date)} · ${money(t.total_budget)}</div>
+      </div>
+      <div class="history-actions">
+        <button class="btn-small" data-open="${t.trip_id}">Open</button>
+        <button class="btn-small danger" data-delete="${t.trip_id}">Delete</button>
+      </div>
+    </div>`).join("");
+}
+
+async function openTrip(tripId) {
+  const response = await fetch(`/api/trips/${tripId}`);
+  if (!response.ok) return;
+  const data = await response.json();
+  renderResults(data, {
+    source: data.source_city,
+    destination: data.destination_city,
+    start_date: data.start_date,
+    end_date: data.end_date,
+  });
+}
+
+async function removeTrip(tripId) {
+  if (!confirm("Delete this trip?")) return;
+  await fetch(`/api/trips/${tripId}`, { method: "DELETE" });
+  loadHistory();
+}
+
+$("history-list").addEventListener("click", (event) => {
+  if (event.target.dataset.open) openTrip(event.target.dataset.open);
+  if (event.target.dataset.delete) removeTrip(event.target.dataset.delete);
+});
+
 /* ---------- start ---------- */
 setupForm();
 setupTabs();
 $("trip-form").addEventListener("submit", planTrip);
+loadHistory();
